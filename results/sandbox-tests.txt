@@ -1,0 +1,11 @@
+QNX qnxwamr 8.0.0 2026/06/05-16:26:03EDT x86pc x86_64
+
+PASS oob.wasm ok rc=0 :: 
+PASS oob.wasm load rc=1 :: Exception: out of bounds memory access
+PASS oob.wasm store rc=1 :: Exception: out of bounds memory access
+PASS oob.wasm stack rc=1 :: Exception: wasm operand stack overflow
+PASS oob.aot ok rc=0 :: 
+PASS oob.aot load rc=1 :: Exception: out of bounds memory access
+PASS oob.aot store rc=1 :: Exception: out of bounds memory access
+PASS oob.aot stack rc=1 :: Exception: out of bounds memory access
+sandbox tests: 8 passed, 0 failed

@@ -6,8 +6,8 @@
  *
  * The module asks the host for SCHED_FIFO priority, starts a periodic QNX
  * timer that delivers a pulse to its own channel, and runs a small PID step
- * on every pulse. It records how late each activation is against the ideal
- * schedule and prints a latency summary.
+ * on every pulse. It records how far each interval between two activations
+ * is from the requested period (jitter) and prints a summary.
  *
  * Usage (inside iwasm): cyclic.wasm [period_us] [cycles] [priority]
  */
@@ -21,7 +21,7 @@
 #define PULSE_TICK 1 /* _PULSE_CODE_MINAVAIL */
 #define MAX_CYCLES 100000
 
-static uint32_t late_ns[MAX_CYCLES];
+static uint32_t jitter_ns[MAX_CYCLES];
 
 static int
 cmp_u32(const void *a, const void *b)
@@ -36,11 +36,11 @@ main(int argc, char **argv)
     uint64_t period_us = argc > 1 ? strtoull(argv[1], NULL, 10) : 1000;
     int cycles = argc > 2 ? atoi(argv[2]) : 5000;
     int prio = argc > 3 ? atoi(argv[3]) : 10;
-    uint64_t period = period_us * 1000ULL, start, next;
+    uint64_t period = period_us * 1000ULL, prev = 0;
     double setpoint = 1.0, plant = 0.0, integ = 0.0, prev_err = 0.0;
     uint64_t sum = 0;
     int32_t ch, timer, r;
-    int i;
+    int i, n = 0;
 
     if (cycles < 10 || cycles > MAX_CYCLES)
         cycles = 5000;
@@ -59,8 +59,6 @@ main(int argc, char **argv)
         printf("cyclic.wasm: qnx_timer_pulse failed: %d\n", (int)timer);
         return 1;
     }
-    start = qnx_clock_ns();
-    next = start + period;
 
     for (i = 0; i < cycles; i++) {
         int32_t reply, code = 0, value;
@@ -75,12 +73,16 @@ main(int argc, char **argv)
             return 1;
         }
         now = qnx_clock_ns();
-        /* lateness against the ideal timeline; the first period is setup */
-        late_ns[i] = now > next ? (uint32_t)(now - next) : 0;
-        sum += late_ns[i];
-        next += period;
-        while (next + period < now) /* overrun: skip missed slots */
-            next += period;
+        if (prev) {
+            /* jitter: how far this interval is from the requested period */
+            uint64_t interval = now - prev;
+            uint64_t dev =
+                interval > period ? interval - period : period - interval;
+            jitter_ns[n] = dev > UINT32_MAX ? UINT32_MAX : (uint32_t)dev;
+            sum += jitter_ns[n];
+            n++;
+        }
+        prev = now;
 
         /* one PID step on a first-order plant */
         err = setpoint - plant;
@@ -94,14 +96,13 @@ main(int argc, char **argv)
     qnx_timer_stop(timer);
     qnx_detach(ch);
 
-    qsort(late_ns, (size_t)cycles, sizeof(late_ns[0]), cmp_u32);
+    qsort(jitter_ns, (size_t)n, sizeof(jitter_ns[0]), cmp_u32);
     printf("cyclic.wasm: %d activations at %llu us, plant output %.4f\n",
            cycles, (unsigned long long)period_us, plant);
-    printf("activation latency (us): min %.1f median %.1f p99 %.1f p99.9 %.1f "
-           "max %.1f mean %.1f\n",
-           late_ns[0] / 1000.0, late_ns[cycles / 2] / 1000.0,
-           late_ns[(cycles * 99) / 100] / 1000.0,
-           late_ns[(cycles * 999) / 1000] / 1000.0,
-           late_ns[cycles - 1] / 1000.0, (double)sum / cycles / 1000.0);
+    printf("period jitter |interval - period| (us): median %.1f p99 %.1f "
+           "p99.9 %.1f max %.1f mean %.1f\n",
+           jitter_ns[n / 2] / 1000.0, jitter_ns[(n * 99) / 100] / 1000.0,
+           jitter_ns[(n * 999) / 1000] / 1000.0, jitter_ns[n - 1] / 1000.0,
+           (double)sum / n / 1000.0);
     return 0;
 }

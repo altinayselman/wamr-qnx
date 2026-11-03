@@ -1,0 +1,6 @@
+aarch64le build check (QNX SDP 8.0, qcc gcc_ntoaarch64le), 2026-11-03
+Built, not run: no AArch64 QNX target was available for this entry.
+iwasm/iwasm: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /usr/lib/ldqnx-64.so.2, with debug_info, not stripped
+qnx/libwamr_qnx_ipc.so: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, not stripped
+qnx/sensor_sim: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /usr/lib/ldqnx-64.so.2, with debug_info, not stripped
+compiler warnings in the aarch64 iwasm build: 0

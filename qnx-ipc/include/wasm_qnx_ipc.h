@@ -23,6 +23,10 @@
 
 #include <stdint.h>
 
+#ifndef __wasm__
+#error "wasm_qnx_ipc.h is the guest API: compile with --target=wasm32-wasip1"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,9 +34,7 @@ extern "C" {
 #define QNX_IMPORT(name) \
     __attribute__((import_module("qnx"), import_name(name)))
 
-/* What qnx_receive() delivered. */
-#define QNX_RECV_MESSAGE 1 /* a MsgSend() from a client; answer with qnx_reply() */
-#define QNX_RECV_PULSE 2   /* a pulse; *pulse_code and *pulse_value are set   */
+#include "wamr_qnx_ipc_proto.h" /* QNX_RECV_* */
 
 /* Register a server name (name_attach). Returns a channel handle. */
 QNX_IMPORT("attach")

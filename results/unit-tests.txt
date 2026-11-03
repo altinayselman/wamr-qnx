@@ -1,0 +1,18 @@
+QNX qnxwamr 8.0.0 2026/06/05-16:26:03EDT x86pc x86_64
+Tue Nov  3 21:26:11 GMT 2026
+gc_test: ran 1 passed 1 failed 0 (exit 0)
+interpreter_test: ran 1 passed 1 failed 0 (exit 0)
+libc_builtin_test: ran 50 passed 50 failed 0 (exit 0)
+linear_memory_test_aot: ran 4 passed 3 failed 1 (exit 1)
+    [  FAILED  ] linear_memory_test_suite_aot.test_mem_grow_out_of_bounds
+linear_memory_test_aot_no_hw_bound: ran 4 passed 3 failed 1 (exit 1)
+    [  FAILED  ] linear_memory_test_suite_aot.test_mem_grow_out_of_bounds
+linear_memory_test_wasm: ran 4 passed 3 failed 1 (exit 1)
+    [  FAILED  ] linear_memory_test_suite_wasm.test_wasm_mem_page_count
+linear_memory_test_wasm_no_hw_bound: ran 4 passed 3 failed 1 (exit 1)
+    [  FAILED  ] linear_memory_test_suite_wasm.test_wasm_mem_page_count
+shared_utils_test: ran 51 passed 51 failed 0 (exit 0)
+wasi_threads: ran 3 passed 3 failed 0 (exit 0)
+wasm_c_api_test: ran 8 passed 8 failed 0 (exit 0)
+wasm_vm_test: ran 7 passed 7 failed 0 (exit 0)
+TOTAL ran 137, failed 4

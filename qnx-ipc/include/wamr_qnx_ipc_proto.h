@@ -18,6 +18,10 @@
 #define WAMR_QNX_MSG_TYPE 0x5741u /* 'WA', above _IO_MAX (0x1ff) */
 #define WAMR_QNX_MSG_MAX 4096u    /* largest payload one message carries */
 
+/* What qnx_receive() delivered. */
+#define QNX_RECV_MESSAGE 1 /* a MsgSend() from a client; answer with qnx_reply() */
+#define QNX_RECV_PULSE 2   /* a pulse; *pulse_code and *pulse_value are set   */
+
 typedef struct {
     uint16_t type;    /* WAMR_QNX_MSG_TYPE */
     uint16_t subtype; /* reserved, 0 */

@@ -1,0 +1,32 @@
+QNX qnxwamr 8.0.0 2026/06/05-16:26:03EDT x86pc x86_64
+CPU:X86_64 Release:8.0.0  FreeMem:852MB/1023MB BootTime:Nov 03 20:34:24 UTC 2026
+Processes: 22, Threads: 115
+Processor1: 721582 Intel 686 F6M186S2 2997MHz FPU 
+Processor2: 721582 Intel 686 F6M186S2 2997MHz FPU 
+
+== idle system, priority 50
+cyclic.wasm: SCHED_FIFO priority 50 -> ok
+cyclic.wasm: 5000 activations at 1000 us, plant output 0.8553
+period jitter |interval - period| (us): median 47.4 p99 404.3 p99.9 851.7 max 2099.7 mean 69.8
+== 4 busy loops at priority 10 (default), Wasm task at priority 50
+cyclic.wasm: SCHED_FIFO priority 50 -> ok
+cyclic.wasm: 5000 activations at 1000 us, plant output 0.8553
+period jitter |interval - period| (us): median 26.7 p99 731.9 p99.9 3345.1 max 5675.5 mean 61.6
+== same load, Wasm task left at priority 10
+cyclic.wasm: SCHED_FIFO priority 10 -> ok
+cyclic.wasm: 5000 activations at 1000 us, plant output 0.8553
+period jitter |interval - period| (us): median 999.2 p99 7043.8 p99.9 8027.7 max 10965.9 mean 1708.1
+
+== interpreter build
+== idle system, priority 50
+cyclic.wasm: SCHED_FIFO priority 50 -> ok
+cyclic.wasm: 5000 activations at 1000 us, plant output 0.8553
+period jitter |interval - period| (us): median 65.8 p99 566.1 p99.9 972.5 max 1808.6 mean 98.6
+== 4 busy loops at priority 10 (default), Wasm task at priority 50
+cyclic.wasm: SCHED_FIFO priority 50 -> ok
+cyclic.wasm: 5000 activations at 1000 us, plant output 0.8553
+period jitter |interval - period| (us): median 25.1 p99 833.1 p99.9 8312.3 max 10386.0 mean 75.7
+== same load, Wasm task left at priority 10
+cyclic.wasm: SCHED_FIFO priority 10 -> ok
+cyclic.wasm: 5000 activations at 1000 us, plant output 0.8553
+period jitter |interval - period| (us): median 999.0 p99 7219.7 p99.9 10678.3 max 15011.4 mean 1719.2

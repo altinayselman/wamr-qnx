@@ -1,0 +1,142 @@
+diff --git a/tests/unit/gc/gc_test.cc b/tests/unit/gc/gc_test.cc
+index 196ddba..839280b 100644
+--- a/tests/unit/gc/gc_test.cc
++++ b/tests/unit/gc/gc_test.cc
+@@ -3,6 +3,7 @@
+  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+  */
+ 
++#include <stdio.h>
+ #include "gtest/gtest.h"
+ #include "bh_platform.h"
+ #include "bh_read_file.h"
+@@ -15,7 +16,20 @@ class WasmGCTest : public testing::Test
+     {
+         char cwd[1024] = { 0 };
+ 
++#if defined(__QNX__)
++        /* QNX has no /proc/self/exe link; /proc/self/exefile holds the path. */
++        {
++            FILE *exefile = fopen("/proc/self/exefile", "r");
++            if (exefile) {
++                size_t n = fread(cwd, 1, sizeof(cwd) - 1, exefile);
++                cwd[n] = '\0';
++                fclose(exefile);
++            }
++        }
++        if (cwd[0] == '\0') {
++#else
+         if (readlink("/proc/self/exe", cwd, 1024) <= 0) {
++#endif
+             return NULL;
+         }
+ 
+diff --git a/tests/unit/linear-memory-aot/linear_memory_aot_test.cc b/tests/unit/linear-memory-aot/linear_memory_aot_test.cc
+index 198dfbc..69aab86 100644
+--- a/tests/unit/linear-memory-aot/linear_memory_aot_test.cc
++++ b/tests/unit/linear-memory-aot/linear_memory_aot_test.cc
+@@ -3,6 +3,7 @@
+  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+  */
+ 
++#include <stdio.h>
+ #include "test_helper.h"
+ #include "gtest/gtest.h"
+ 
+@@ -17,7 +18,20 @@ get_binary_path()
+     char cwd[1024];
+     memset(cwd, 0, 1024);
+ 
++#if defined(__QNX__)
++    /* QNX has no /proc/self/exe link; /proc/self/exefile holds the path. */
++    {
++        FILE *exefile = fopen("/proc/self/exefile", "r");
++        if (exefile) {
++            size_t n = fread(cwd, 1, sizeof(cwd) - 1, exefile);
++            cwd[n] = '\0';
++            fclose(exefile);
++        }
++    }
++    if (cwd[0] == '\0') {
++#else
+     if (readlink("/proc/self/exe", cwd, 1024) <= 0) {
++#endif
+     }
+ 
+     char *path_end = strrchr(cwd, '/');
+diff --git a/tests/unit/linear-memory-wasm/linear_memory_wasm_test.cc b/tests/unit/linear-memory-wasm/linear_memory_wasm_test.cc
+index a5db0e0..ef56448 100644
+--- a/tests/unit/linear-memory-wasm/linear_memory_wasm_test.cc
++++ b/tests/unit/linear-memory-wasm/linear_memory_wasm_test.cc
+@@ -3,6 +3,7 @@
+  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+  */
+ 
++#include <stdio.h>
+ #include "test_helper.h"
+ #include "gtest/gtest.h"
+ 
+@@ -17,7 +18,20 @@ get_binary_path()
+     char cwd[1024];
+     memset(cwd, 0, 1024);
+ 
++#if defined(__QNX__)
++    /* QNX has no /proc/self/exe link; /proc/self/exefile holds the path. */
++    {
++        FILE *exefile = fopen("/proc/self/exefile", "r");
++        if (exefile) {
++            size_t n = fread(cwd, 1, sizeof(cwd) - 1, exefile);
++            cwd[n] = '\0';
++            fclose(exefile);
++        }
++    }
++    if (cwd[0] == '\0') {
++#else
+     if (readlink("/proc/self/exe", cwd, 1024) <= 0) {
++#endif
+     }
+ 
+     char *path_end = strrchr(cwd, '/');
+diff --git a/tests/unit/wasm-vm/wasm_vm.cc b/tests/unit/wasm-vm/wasm_vm.cc
+index 670fa59..810d209 100644
+--- a/tests/unit/wasm-vm/wasm_vm.cc
++++ b/tests/unit/wasm-vm/wasm_vm.cc
+@@ -560,7 +560,10 @@ TEST_F(WasmVMTest, Test_app4_single)
+     ASSERT_TRUE(((WASMFunctionInstance *)func_inst)->ret_cell_num == 1);
+ 
+     wasm_runtime_call_wasm(exec_env, func_inst, 0, argv);
+-    printf("exception is %s", wasm_runtime_get_exception(module_inst));
++    printf("exception is %s", /* %s with NULL is undefined; QNX libc faults */
++           wasm_runtime_get_exception(module_inst)
++               ? wasm_runtime_get_exception(module_inst)
++               : "(none)");
+ 
+     ASSERT_TRUE(wasm_runtime_get_exception(module_inst) == NULL);
+     ASSERT_TRUE(argv[0] == 1);
+@@ -613,7 +616,7 @@ TEST_F(WasmVMTest, Test_app4_plus_one)
+     ASSERT_TRUE(((WASMFunctionInstance *)func_inst)->ret_cell_num == 1);
+ 
+     wasm_runtime_call_wasm(exec_env, func_inst, 0, argv);
+-    printf("exception is %s\n", wasm_runtime_get_exception(module_inst));
++    printf("exception is %s\n", wasm_runtime_get_exception(module_inst) ? wasm_runtime_get_exception(module_inst) : "(none)");
+ 
+     ASSERT_TRUE(wasm_runtime_get_exception(module_inst) == NULL);
+     ASSERT_TRUE(argv[0] == 1);
+@@ -627,7 +630,7 @@ TEST_F(WasmVMTest, Test_app4_plus_one)
+ 
+     argv[0] = 2;
+     wasm_runtime_call_wasm(exec_env, func_inst, 1, argv);
+-    printf("exception is %s\n", wasm_runtime_get_exception(module_inst));
++    printf("exception is %s\n", wasm_runtime_get_exception(module_inst) ? wasm_runtime_get_exception(module_inst) : "(none)");
+ 
+     ASSERT_TRUE(wasm_runtime_get_exception(module_inst) == NULL);
+     ASSERT_TRUE(argv[0] == 3);
+@@ -642,7 +645,7 @@ TEST_F(WasmVMTest, Test_app4_plus_one)
+     argv[0] = 4;
+     argv[1] = 9;
+     wasm_runtime_call_wasm(exec_env, func_inst, 2, argv);
+-    printf("exception is %s\n", wasm_runtime_get_exception(module_inst));
++    printf("exception is %s\n", wasm_runtime_get_exception(module_inst) ? wasm_runtime_get_exception(module_inst) : "(none)");
+ 
+     ASSERT_TRUE(wasm_runtime_get_exception(module_inst) == NULL);
+     ASSERT_TRUE(argv[0] == 9);

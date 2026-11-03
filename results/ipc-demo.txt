@@ -1,0 +1,29 @@
+QNX qnxwamr 8.0.0 2026/06/05-16:26:03EDT x86pc x86_64
+
+== capability check: no allowlist, attach must be refused
+filter.wasm: qnx_attach(wasm_filter) failed: -1
+
+#00: 0x0000 - _start
+
+rc=1
+== filter.aot serving 'wasm_filter'
+filter.wasm: serving 'wasm_filter' (alpha 0.20) from inside the Wasm sandbox
+total 0
+nrw-rw-rw-  1 root root 0 2026-11-03 21:28 wasm_filter
+     pid name               
+14831638 iwasm              
+sample    0 raw  19.880 -> filtered  19.880
+sample    1 raw  20.200 -> filtered  19.944
+sample    2 raw  19.870 -> filtered  19.929
+sample 1999 raw  16.824 -> filtered  17.130
+sensor_sim: 2000 samples, spikes injected 21, flagged by wasm 21
+round trip native->wasm->native (ns): min 2060 median 2911 p99 119414 max 922852 mean 11556
+filter.wasm: stop after 2000 samples, 21 spikes rejected
+sensor_sim rc=0
+
+== interpreter
+sample    2 raw  19.870 -> filtered  19.929
+sample 1999 raw  16.824 -> filtered  17.130
+sensor_sim: 2000 samples, spikes injected 21, flagged by wasm 21
+round trip native->wasm->native (ns): min 2177 median 3059 p99 75039 max 308595 mean 11097
+sensor_sim rc=0

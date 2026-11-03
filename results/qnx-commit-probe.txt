@@ -1,0 +1,15 @@
+CPU:X86_64 Release:8.0.0  FreeMem:852MB/1023MB BootTime:Nov 03 20:34:24 UTC 2026
+RLIMIT_AS cur fffffffffffffffd max fffffffffffffffd
+lazy=0 reserve 1G PROT_NONE: ok
+   mprotect RW 0G: ok
+lazy=0 reserve 4G PROT_NONE: ok
+   mprotect RW 2G: Not enough memory
+lazy=0 reserve 8G PROT_NONE: ok
+   mprotect RW 4G: Not enough memory
+lazy=1 reserve 1G PROT_NONE: ok
+   mprotect RW 0G: ok
+lazy=1 reserve 4G PROT_NONE: ok
+   mprotect RW 2G: Not enough memory
+lazy=1 reserve 8G PROT_NONE: ok
+   mprotect RW 4G: Not enough memory
+direct RW lazy 4G: Not enough memory

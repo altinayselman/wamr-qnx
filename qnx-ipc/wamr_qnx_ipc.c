@@ -34,7 +34,6 @@
 
 #include "wasm_export.h"
 #include "wamr_qnx_ipc_proto.h"
-#include "wasm_qnx_ipc.h" /* only for QNX_RECV_* values */
 
 #define MAX_CHANNELS 8
 #define MAX_CONNECTIONS 16
@@ -361,7 +360,7 @@ qnx_send_wrapper(wasm_exec_env_t env, int32_t h, const void *sbuf,
     hdr.subtype = 0;
     hdr.length = slen;
     SETIOV(&siov[0], &hdr, sizeof(hdr));
-    SETIOV(&siov[1], sbuf, slen);
+    SETIOV(&siov[1], (void *)sbuf, slen); /* MsgSendv does not write it */
     SETIOV(&riov[0], rbuf, rlen);
 
     status = MsgSendv(coid, siov, 2, riov, 1);
@@ -406,8 +405,17 @@ qnx_timer_pulse_wrapper(wasm_exec_env_t env, int32_t h, int64_t period_ns,
             goto out;
         }
     }
-    /* Pulse priority follows the receiving thread (-1 = sender's prio). */
-    SIGEV_PULSE_INIT(&ev, ch->self_coid, SIGEV_PULSE_PRIO_INHERIT, code, t);
+    /* A thread that receives a pulse runs at the pulse's priority, so the
+       pulse carries the caller's current priority: a Wasm task raised to
+       SCHED_FIFO 50 keeps running at 50 when its timer wakes it. */
+    {
+        struct sched_param sp;
+        int policy, prio = 10;
+
+        if (pthread_getschedparam(pthread_self(), &policy, &sp) == 0)
+            prio = sp.sched_priority;
+        SIGEV_PULSE_INIT(&ev, ch->self_coid, prio, code, t);
+    }
     if (timer_create(CLOCK_MONOTONIC, &ev, &g_timers[t].id) == -1) {
         ret = -errno;
         goto out;

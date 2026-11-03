@@ -1,0 +1,5 @@
+# local/snippets/ifs_files.custom for mkqnximage (QNX SDP 8.0)
+# OpenSSH in the current SDP 8.0 target splits sshd into sshd-session and
+# sshd-auth; mkqnximage's standard system.build only ships sshd-session, so
+# sshd refuses logins without this line.
+/usr/libexec/sshd-auth=usr/libexec/sshd-auth
