@@ -2,7 +2,7 @@
  * wasm_qnx_ipc.h - guest-side (WebAssembly) API for QNX native message passing.
  *
  * Copyright 2026 Selman Altinay
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Compile Wasm modules that include this header with wasi-sdk, for example:
  *   clang --target=wasm32-wasip1 -O2 -I qnx-ipc/include app.c -o app.wasm

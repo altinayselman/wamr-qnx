@@ -3,7 +3,7 @@
  * QNX programs that talk to Wasm modules.
  *
  * Copyright 2026 Selman Altinay
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * SPDX-License-Identifier: Apache-2.0
  *
  * name_open()/name_attach() servers also receive _IO_CONNECT messages and
  * system pulses, so every application message starts with a small header

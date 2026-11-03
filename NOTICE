@@ -1,0 +1,21 @@
+wamr-qnx - a QNX 8.0 port of the WebAssembly Micro Runtime (WAMR)
+Copyright 2026 Selman Altinay
+
+This repository contains the porting work only. It does not contain the
+upstream source tree or its commit history.
+
+Upstream project: WebAssembly Micro Runtime (WAMR)
+  https://github.com/bytecodealliance/wasm-micro-runtime
+  pinned tag: WAMR-2.4.5
+  Copyright (C) 2019 Intel Corporation and other WAMR contributors
+  Licensed under the Apache License 2.0 with LLVM Exceptions
+
+The files under patches/ modify upstream WAMR files and new files added to the
+upstream tree; those changes are offered under the upstream licence (Apache-2.0
+WITH LLVM-exception) so that they can be contributed back. Everything else in
+this repository (qnx-ipc/, examples/, scripts/, cmake/, docs) is licensed under
+the Apache License 2.0 (see LICENSE).
+
+QNX is a trademark of BlackBerry Limited. This project is not affiliated with
+or endorsed by BlackBerry or the Bytecode Alliance. No QNX SDP files are
+included in this repository.

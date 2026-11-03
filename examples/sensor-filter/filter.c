@@ -2,7 +2,7 @@
  * filter.c - a WebAssembly module that acts as a QNX message-passing server.
  *
  * Copyright 2026 Selman Altinay
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * SPDX-License-Identifier: Apache-2.0
  *
  * It registers the name "wasm_filter" (name_attach), then answers each
  * MsgSend from a native client with an exponentially smoothed value and a

@@ -2,7 +2,7 @@
  * sensor_msg.h - payload shared by filter.wasm and the native sensor_sim.
  *
  * Copyright 2026 Selman Altinay
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * SPDX-License-Identifier: Apache-2.0
  */
 #ifndef SENSOR_MSG_H
 #define SENSOR_MSG_H

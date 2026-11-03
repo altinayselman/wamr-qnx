@@ -2,7 +2,7 @@
  * cyclic.c - a periodic control task written as a WebAssembly module.
  *
  * Copyright 2026 Selman Altinay
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * SPDX-License-Identifier: Apache-2.0
  *
  * The module asks the host for SCHED_FIFO priority, starts a periodic QNX
  * timer that delivers a pulse to its own channel, and runs a small PID step

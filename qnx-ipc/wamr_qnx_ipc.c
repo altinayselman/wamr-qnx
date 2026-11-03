@@ -3,7 +3,7 @@
  * WAMR (iwasm --native-lib=libwamr_qnx_ipc.so).
  *
  * Copyright 2026 Selman Altinay
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Exposes name_attach/MsgReceive/MsgReply/name_open/MsgSend, periodic pulse
  * timers, CLOCK_MONOTONIC and SCHED_FIFO priority to Wasm guests under the

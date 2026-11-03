@@ -2,7 +2,7 @@
  * sensor_sim.c - native QNX client for filter.wasm.
  *
  * Copyright 2026 Selman Altinay
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Sends a noisy sine wave with injected spikes to the Wasm server over QNX
  * message passing (name_open + MsgSendv) and measures each round trip with
