@@ -69,8 +69,8 @@ main(int argc, char **argv)
         sensor_result_t r;
         uint64_t t0, t1;
 
-        s.value = (float)(20.0 + 3.0 * sin(i / 25.0)
-                          + ((rand() % 100) - 50) / 100.0);
+        s.value =
+            (float)(20.0 + 3.0 * sin(i / 25.0) + ((rand() % 100) - 50) / 100.0);
         if (i % 97 == 50) { /* injected spike */
             s.value += 40.0f;
             spikes_sent++;

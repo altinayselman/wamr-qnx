@@ -52,7 +52,7 @@ index d90f38e..e97c577 100644
      return __WASI_ESUCCESS;
  }
 diff --git a/core/shared/platform/common/posix/posix_memmap.c b/core/shared/platform/common/posix/posix_memmap.c
-index d5cad88..0c6acd8 100644
+index d5cad88..383300f 100644
 --- a/core/shared/platform/common/posix/posix_memmap.c
 +++ b/core/shared/platform/common/posix/posix_memmap.c
 @@ -83,7 +83,7 @@ os_mmap(void *hint, size_t size, int prot, int flags, os_file_handle file)
@@ -64,11 +64,12 @@ index d5cad88..0c6acd8 100644
      if (flags & MMAP_MAP_32BIT)
          map_flags |= MAP_32BIT;
  #endif
-@@ -138,6 +138,24 @@ os_mmap(void *hint, size_t size, int prot, int flags, os_file_handle file)
+@@ -138,6 +138,25 @@ os_mmap(void *hint, size_t size, int prot, int flags, os_file_handle file)
      }
  #endif /* end of BUILD_TARGET_RISCV64_LP64D || BUILD_TARGET_RISCV64_LP64 */
  
-+#if defined(__QNX__)     && (defined(BUILD_TARGET_X86_64) || defined(BUILD_TARGET_AMD_64))
++#if defined(__QNX__) \
++    && (defined(BUILD_TARGET_X86_64) || defined(BUILD_TARGET_AMD_64))
 +    /* QNX has no MAP_32BIT. AOT code on x86-64 must sit in the low 2 GB, so
 +       ask the memory manager for space below 2 GB with MAP_BELOW, which
 +       treats the hint as an upper bound rather than a preferred address. */
@@ -76,8 +77,8 @@ index d5cad88..0c6acd8 100644
 +        && (flags & MMAP_MAP_32BIT)) {
 +        uint8 *below = (uint8 *)(uintptr_t)(2ULL * BH_GB - request_size);
 +
-+        addr = mmap(below, request_size, map_prot, map_flags | MAP_BELOW,
-+                    file, 0);
++        addr =
++            mmap(below, request_size, map_prot, map_flags | MAP_BELOW, file, 0);
 +        if (addr != MAP_FAILED
 +            && (uintptr_t)addr + request_size > (uintptr_t)(2ULL * BH_GB)) {
 +            munmap(addr, request_size);
@@ -89,7 +90,7 @@ index d5cad88..0c6acd8 100644
      /* memory hasn't been mapped or was mapped failed previously */
      if (addr == MAP_FAILED) {
          /* try 5 times on EAGAIN or ENOMEM, and keep retrying on EINTR */
-@@ -274,6 +292,13 @@ os_mprotect(void *addr, size_t size, int prot)
+@@ -274,6 +293,13 @@ os_mprotect(void *addr, size_t size, int prot)
      if (!addr)
          return 0;
  
@@ -142,10 +143,10 @@ index 80b7d65..45d09e8 100644
          stack_size = pthread_get_stacksize_np(self);
 diff --git a/core/shared/platform/qnx/platform_init.c b/core/shared/platform/qnx/platform_init.c
 new file mode 100644
-index 0000000..2aae13f
+index 0000000..2856fc9
 --- /dev/null
 +++ b/core/shared/platform/qnx/platform_init.c
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,44 @@
 +/*
 + * Copyright (C) 2019 Intel Corporation.  All rights reserved.
 + * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -161,7 +162,8 @@ index 0000000..2aae13f
 +
 +void
 +bh_platform_destroy()
-+{}
++{
++}
 +
 +int
 +os_printf(const char *format, ...)

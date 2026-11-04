@@ -1,8 +1,8 @@
 diff --git a/core/iwasm/libraries/libc-builtin/libc_builtin_wrapper.c b/core/iwasm/libraries/libc-builtin/libc_builtin_wrapper.c
-index a68c074..6f879fe 100644
+index a68c074..0b77eeb 100644
 --- a/core/iwasm/libraries/libc-builtin/libc_builtin_wrapper.c
 +++ b/core/iwasm/libraries/libc-builtin/libc_builtin_wrapper.c
-@@ -199,6 +199,14 @@ _vprintf_wa(out_func_t out, void *ctx, const char *fmt, _va_list ap,
+@@ -199,7 +199,17 @@ _vprintf_wa(out_func_t out, void *ctx, const char *fmt, _va_list ap,
                              }
                          }
  
@@ -13,7 +13,10 @@ index a68c074..6f879fe 100644
 +                            n = snprintf(buf, sizeof(buf), "0x%" PRIx32,
 +                                         (uint32)d);
 +                        else
-+#endif
++                            n = snprintf(buf, sizeof(buf), fmt_buf, d);
++#else
                          n = snprintf(buf, sizeof(buf), fmt_buf, d);
++#endif
                      }
                      else {
+                         int64 lld;

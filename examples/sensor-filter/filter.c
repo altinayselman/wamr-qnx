@@ -9,7 +9,8 @@
  * spike flag. The module has no other access to the system: only the names
  * the host allows through WAMR_QNX_IPC_ALLOW.
  *
- * Build: clang --target=wasm32-wasip1 -O2 -I ../../qnx-ipc/include filter.c -o filter.wasm
+ * Build: clang --target=wasm32-wasip1 -O2 -I ../../qnx-ipc/include filter.c -o
+ * filter.wasm
  */
 #include <math.h>
 #include <stdint.h>
@@ -34,8 +35,9 @@ main(int argc, char **argv)
         printf("filter.wasm: qnx_attach(%s) failed: %d\n", name, (int)ch);
         return 1;
     }
-    printf("filter.wasm: serving '%s' (alpha %.2f) from inside the Wasm sandbox\n",
-           name, alpha);
+    printf(
+        "filter.wasm: serving '%s' (alpha %.2f) from inside the Wasm sandbox\n",
+        name, alpha);
     fflush(stdout);
 
     for (;;) {

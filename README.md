@@ -154,7 +154,8 @@ Suites that need LLVM or wasi-sdk at build time (`aot`, `compilation`, `custom-s
   Center. Command line:
   `qnxsoftwarecenter_clt -installBaseline com.qnx.qnx800 -destination <dir>`.
 - CMake ≥ 3.21, Ninja, Git and bash (Git Bash on Windows works).
-- [wasi-sdk](https://github.com/WebAssembly/wasi-sdk) 34 and the `wamrc` 2.4.5 release binary, used to
+- [wasi-sdk](https://github.com/WebAssembly/wasi-sdk) 34 and the `wamrc` 2.4.5 binary from the
+  [WAMR releases](https://github.com/bytecodealliance/wasm-micro-runtime/releases/tag/WAMR-2.4.5), used to
   build the example modules.
 - QEMU with KVM for the target. This repository used QEMU 8.2 in WSL2 (Ubuntu 24.04); a Linux host works
   the same way.
@@ -172,12 +173,16 @@ source <sdp>/qnxsdp-env.sh           # Windows: run qnxsdp-env.bat, or export QN
 scripts/build-qnx.sh x86_64          # iwasm, libwamr_qnx_ipc.so, sensor_sim
 ```
 
-Build the Wasm modules and their AOT versions:
+Build the Wasm modules and their AOT versions (wasi-sdk's `clang`, the `wamrc` 2.4.5 release binary):
 
 ```sh
-clang --target=wasm32-wasip1 -O2 -I qnx-ipc/include -I examples/sensor-filter \
-      examples/sensor-filter/filter.c -o filter.wasm
-wamrc --target=x86_64 --target-abi=gnu --cpu=x86-64-v2 -o filter.aot filter.wasm
+CFLAGS="--target=wasm32-wasip1 -O2 -I qnx-ipc/include"
+clang $CFLAGS -I examples/sensor-filter examples/sensor-filter/filter.c -o filter.wasm
+clang $CFLAGS examples/rt-cyclic/cyclic.c -o cyclic.wasm
+clang --target=wasm32-wasip1 -O1 examples/sandbox-trap/oob.c -o oob.wasm
+for m in filter cyclic oob; do
+  wamrc --target=x86_64 --target-abi=gnu --cpu=x86-64-v2 -o $m.aot $m.wasm
+done
 ```
 
 > On Windows, pass `--target-abi=gnu` to `wamrc`. Its default produces a COFF-flavoured AOT file, which
@@ -186,38 +191,52 @@ wamrc --target=x86_64 --target-abi=gnu --cpu=x86-64-v2 -o filter.aot filter.wasm
 ### 4. Make a QEMU image
 
 ```sh
-mkdir vm && cd vm
-mkqnximage --type=qemu --arch=x86_64 --ip=dhcp --hostname=qnxwamr --cpu=2 --ram=1G \
-           --data-size=512 --ssh-ident=$HOME/.ssh/qnxvm.pub --sshd-pregen=no --noprompt
+ssh-keygen -t ed25519 -N "" -f ~/.ssh/qnxvm            # key for root logins on the VM
+scripts/vm/make-image.sh ./vm ~/.ssh/qnxvm.pub         # wraps mkqnximage --type=qemu --arch=x86_64 ...
 ```
 
-> With the current SDP 8.0 target packages, OpenSSH needs `/usr/libexec/sshd-auth`, but the standard
-> mkqnximage system build does not ship it, so `sshd` refuses connections. Add this line to
-> `local/snippets/ifs_files.custom` and rebuild with `--build` (the script does this):
-> `/usr/libexec/sshd-auth=usr/libexec/sshd-auth`
+On Windows, run `make-image.sh` from a shell where `qnxsdp-env.bat` has been applied, because
+mkqnximage uses the SDP's own bash.
 
-Boot it under KVM with SSH forwarded to the host:
+> With the current SDP 8.0 target packages, OpenSSH needs `/usr/libexec/sshd-auth`, but the standard
+> mkqnximage system build does not ship it, so `sshd` refuses connections. `scripts/vm/ifs_files.custom`
+> adds it to the image, and `make-image.sh` installs that snippet and rebuilds with `--build`.
+
+Boot it under KVM (Linux, or WSL2 on Windows) with SSH forwarded to `localhost:2222`:
 
 ```sh
-qemu-system-x86_64 -enable-kvm -cpu host -smp 2 -m 1G \
-  -drive file=output/disk-qemu,format=raw,if=ide -kernel output/ifs.bin \
-  -netdev user,id=n0,hostfwd=tcp:127.0.0.1:2222-:22 -device virtio-net-pci,netdev=n0 \
-  -display none -serial file:qemu.out -daemonize
+scripts/vm/run-qemu.sh ./vm      # qemu-system-x86_64 -enable-kvm ... -daemonize
 ```
 
 ### 5. Run on QNX
 
 ```sh
-scp -P 2222 iwasm libwamr_qnx_ipc.so sensor_sim *.wasm *.aot scripts/target/*.sh root@127.0.0.1:/data/wamr/
-ssh -p 2222 root@127.0.0.1
+B=build/x86_64
+SSH="-i $HOME/.ssh/qnxvm -o StrictHostKeyChecking=no"
+ssh -p 2222 $SSH root@127.0.0.1 mkdir -p /data/wamr
+scp -O -P 2222 $SSH $B/iwasm/iwasm $B/qnx/libwamr_qnx_ipc.so $B/qnx/sensor_sim \
+    *.wasm *.aot scripts/target/*.sh root@127.0.0.1:/data/wamr/
+ssh -p 2222 $SSH root@127.0.0.1
 cd /data/wamr
 sh sandbox-tests.sh                       # faulty modules trap, the system keeps running
 sh ipc-demo.sh /data/wamr aot 2000        # Wasm server + native client over QNX messages
 sh rt-demo.sh /data/wamr aot 1000 5000 50 # 1 ms Wasm control task, idle vs. CPU hogs
 ```
 
-Upstream unit tests: configure `tests/unit-qnx` with the same toolchain file, copy each suite's binary
-and data into `/data/wamr/unit/<suite>/` and run `sh unit-tests.sh /data/wamr/unit`.
+### 6. Upstream unit tests (optional)
+
+```sh
+cmake -S tests/unit-qnx -B build/unit -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/qnx-toolchain.cmake \
+      -DQNX_ARCH=x86_64 -DWAMR_BUILD_TARGET=X86_64
+cmake --build build/unit -- -k 0      # the post-build test discovery step fails on the host: expected,
+                                      # the test binaries are QNX executables
+```
+
+Copy each suite's test binary and its data into `/data/wamr/unit/<suite>/` and run
+`sh unit-tests.sh /data/wamr/unit`. The data comes from upstream: the `*.wasm` files in
+`tests/unit/linear-memory-wasm/wasm_files`, `tests/unit/wasm-vm/wasm-apps/app4` and `tests/unit/gc/wasm-apps`.
+The `linear-memory-aot` suite also needs `.aot` files: build them from the `.wast` files in that directory
+with `wat2wasm` and `wamrc`, as its `build_aot.sh` does.
 
 ## Limitations (stated plainly)
 
