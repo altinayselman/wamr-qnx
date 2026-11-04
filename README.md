@@ -4,6 +4,7 @@ This repository ports the [WebAssembly Micro Runtime (WAMR)](https://github.com/
 to **QNX 8.0**. It also adds a QNX-native API so that a sandboxed WebAssembly module can take part in
 QNX message passing: it can be a server, a client, or a periodic real-time task.
 
+- **Demo video (2:15):** https://youtu.be/nnS_JjgbGbk
 - **Upstream:** https://github.com/bytecodealliance/wasm-micro-runtime, tag `WAMR-2.4.5`. The upstream
   tree is fetched by URL; this repository does not copy it and is not a fork.
 - **QNX version:** QNX SDP 8.0 (QNX OS 8.0.0, kernel build 2026/06/05), free non-commercial licence.
